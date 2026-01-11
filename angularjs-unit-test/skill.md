@@ -1,3 +1,8 @@
+---
+name: angularjs-unit-testing
+description: Use this skill for any AngularJS unit testing tasks
+---
+
 # AngularJS Unit Testing Skill
 
 ## Overview
