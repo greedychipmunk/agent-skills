@@ -7,6 +7,21 @@ import { supabase } from './supabase-client'
 import type { User, Session, AuthError, Provider } from '@supabase/supabase-js'
 
 // =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+
+/**
+ * Get redirect URL for current environment
+ * Falls back to provided URL or throws error if not available
+ */
+function getRedirectUrl(path: string = '/auth/callback'): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}${path}`
+  }
+  throw new Error('Redirect URL must be provided in server-side environments')
+}
+
+// =============================================================================
 // AUTHENTICATION FUNCTIONS
 // =============================================================================
 
@@ -21,14 +36,15 @@ export async function signUpWithEmail(
     username?: string
     avatar_url?: string
     [key: string]: any
-  }
+  },
+  redirectTo?: string
 ) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: metadata,
-      emailRedirectTo: `${window.location.origin}/auth/callback`,
+      emailRedirectTo: redirectTo || getRedirectUrl(),
     },
   })
 
@@ -52,11 +68,11 @@ export async function signInWithEmail(email: string, password: string) {
 /**
  * Sign in with magic link (passwordless)
  */
-export async function signInWithMagicLink(email: string) {
+export async function signInWithMagicLink(email: string, redirectTo?: string) {
   const { data, error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${window.location.origin}/auth/callback`,
+      emailRedirectTo: redirectTo || getRedirectUrl(),
     },
   })
 
@@ -67,11 +83,11 @@ export async function signInWithMagicLink(email: string) {
 /**
  * Sign in with OAuth provider
  */
-export async function signInWithOAuth(provider: Provider) {
+export async function signInWithOAuth(provider: Provider, redirectTo?: string) {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: redirectTo || getRedirectUrl(),
     },
   })
 
@@ -129,9 +145,9 @@ export async function signOut() {
 /**
  * Reset password (send reset email)
  */
-export async function resetPassword(email: string) {
+export async function resetPassword(email: string, redirectTo?: string) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/reset-password`,
+    redirectTo: redirectTo || getRedirectUrl('/auth/reset-password'),
   })
 
   if (error) throw error

@@ -52,9 +52,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
  * This should be used in API routes, Server Components, or server-side functions
  */
 export function createServerClient(accessToken?: string) {
+  // Environment variables are validated at module load time
+  const url = supabaseUrl as string
+  const key = supabaseAnonKey as string
+  
   return createClient<Database>(
-    supabaseUrl!,
-    supabaseAnonKey!,
+    url,
+    key,
     {
       auth: {
         persistSession: false,
@@ -86,7 +90,10 @@ export function createAdminClient() {
     throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set')
   }
 
-  return createClient<Database>(supabaseUrl!, serviceRoleKey, {
+  // Environment variables are validated at module load time
+  const url = supabaseUrl as string
+
+  return createClient<Database>(url, serviceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

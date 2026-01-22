@@ -5,7 +5,8 @@
 import { supabase } from './supabase-client'
 import type { Database } from '@/types/database.types'
 
-// Note: React imports at top for better organization
+// Note: React imports for hooks - remove if using in non-React environments
+// For non-React environments (Node.js, Edge Functions), use the non-hook functions only
 import { useState } from 'react'
 
 // =============================================================================
