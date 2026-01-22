@@ -383,6 +383,11 @@ This skill includes executable scripts in the `scripts/` folder:
   ./scripts/generate-types.sh [--output PATH]
   ```
 
+- **link-project.sh**: Link local project to remote Supabase project
+  ```bash
+  ./scripts/link-project.sh <project-ref>
+  ```
+
 ### Edge Functions
 - **create-function.sh**: Create a new Edge Function with boilerplate
   ```bash
@@ -400,6 +405,16 @@ This skill includes executable scripts in the `scripts/` folder:
   ```
 
 ### Testing & Security
+- **setup-testing.sh**: Set up testing environment with Vitest
+  ```bash
+  ./scripts/setup-testing.sh
+  ```
+
+- **run-tests.sh**: Run tests with various options
+  ```bash
+  ./scripts/run-tests.sh [--watch] [--ui] [--coverage]
+  ```
+
 - **test-rls.sh**: Test RLS policies with different user contexts
   ```bash
   ./scripts/test-rls.sh <table-name>
@@ -415,24 +430,16 @@ This skill includes executable scripts in the `scripts/` folder:
 This skill includes production-ready templates in the `templates/` folder:
 
 ### Database
-- **schema-base.sql**: Base schema with profiles, common patterns, and RLS
-- **rls-policies.sql**: Common RLS policy patterns (user-owned, org-based, public)
-- **functions-triggers.sql**: PostgreSQL functions and triggers library
+- **schema-base.sql**: Complete base schema with profiles, posts, comments, RLS policies, triggers, and indexes
+- **rls-policies.sql**: Comprehensive RLS policy patterns library (10+ patterns including user-owned, org-based, role-based, time-based, and more)
 
 ### Client Code
-- **supabase-client.ts**: Client initialization with type safety
-- **auth-helpers.ts**: Authentication utility functions and hooks
-- **storage-helpers.ts**: File upload/download utilities
-- **realtime-hooks.ts**: React hooks for realtime subscriptions
+- **supabase-client.ts**: Type-safe client initialization with browser, server, and admin clients plus utility functions
+- **auth-helpers.ts**: Complete authentication utilities including email/password, OAuth, magic links, phone auth, MFA, and React hooks
+- **storage-helpers.ts**: File upload/download utilities with progress tracking, image compression, bucket management, and React hooks
 
 ### Edge Functions
-- **edge-function-base.ts**: Edge Function boilerplate with CORS and auth
-- **webhook-handler.ts**: Webhook processing template
-- **scheduled-task.ts**: Cron job function template
-
-### Integration
-- **next-middleware.ts**: Next.js middleware with Supabase auth
-- **server-client.ts**: Server-side Supabase client for SSR
+- **edge-function-complete.ts**: Complete Edge Function template with CORS, authentication, validation, error handling, and common patterns (webhooks, scheduled tasks, email, external APIs, rate limiting)
 
 ## Resources
 
