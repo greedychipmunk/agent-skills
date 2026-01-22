@@ -453,6 +453,8 @@ async function callExternalAPI(endpoint: string, data: any) {
 }
 
 // 5. RATE LIMITING PATTERN
+// NOTE: This in-memory implementation is for development/testing only.
+// For production, use a database-backed solution (Redis, Supabase tables) or external service.
 const rateLimits = new Map<string, { count: number; resetAt: number }>()
 
 function checkRateLimit(userId: string, maxRequests: number = 10, windowMs: number = 60000) {

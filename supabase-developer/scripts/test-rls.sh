@@ -22,8 +22,8 @@ if ! [[ "$TABLE_NAME" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
     exit 1
 fi
 
-# Create test SQL file
-TEST_FILE="/tmp/test-rls-$TABLE_NAME.sql"
+# Create test SQL file using mktemp for security
+TEST_FILE=$(mktemp /tmp/test-rls-XXXXXX.sql)
 
 cat > "$TEST_FILE" << EOF
 -- RLS Policy Testing for $TABLE_NAME

@@ -3,6 +3,10 @@
 // Place in: src/lib/storage-helpers.ts
 
 import { supabase } from './supabase-client'
+import type { Database } from '@/types/database.types'
+
+// Note: React imports at top for better organization
+import { useState } from 'react'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -463,8 +467,6 @@ async function compressImage(
 // =============================================================================
 // REACT HOOKS
 // =============================================================================
-
-import { useState } from 'react'
 
 /**
  * Hook for file upload with progress
