@@ -16,6 +16,12 @@ TABLE_NAME="$1"
 echo "🔒 Testing RLS policies for table: $TABLE_NAME"
 echo ""
 
+# Validate table name to prevent SQL injection (alphanumeric and underscore only)
+if ! [[ "$TABLE_NAME" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+    echo "❌ Error: Invalid table name. Use only letters, numbers, and underscores."
+    exit 1
+fi
+
 # Create test SQL file
 TEST_FILE="/tmp/test-rls-$TABLE_NAME.sql"
 

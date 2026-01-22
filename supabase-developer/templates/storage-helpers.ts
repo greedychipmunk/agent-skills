@@ -80,9 +80,11 @@ export async function uploadFileWithProgress(
   onProgress: (progress: number) => void,
   options: UploadOptions = {}
 ): Promise<UploadResult> {
-  // Simulate progress for better UX
+  // Simulate progress for better UX with predictable increments
+  let progress = 0
   const progressInterval = setInterval(() => {
-    onProgress(Math.min(90, Math.random() * 80))
+    progress = Math.min(90, progress + Math.random() * 10)
+    onProgress(Math.round(progress))
   }, 200)
 
   try {
