@@ -80,12 +80,12 @@ export async function uploadFileWithProgress(
   onProgress: (progress: number) => void,
   options: UploadOptions = {}
 ): Promise<UploadResult> {
-  // Simulate progress for better UX with predictable increments
+  // Simulate progress for better UX with smooth increments
   let progress = 0
   const progressInterval = setInterval(() => {
-    progress = Math.min(90, progress + Math.random() * 10)
-    onProgress(Math.round(progress))
-  }, 200)
+    progress = Math.min(90, progress + 5)
+    onProgress(progress)
+  }, 100)
 
   try {
     const result = await uploadFile(bucket, path, file, options)

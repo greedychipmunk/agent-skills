@@ -65,7 +65,7 @@ ORDER BY policyname;
 BEGIN;
 SET LOCAL role TO anon;
 SET LOCAL request.jwt.claim.sub TO '';
-SELECT COUNT(*) as rows_visible FROM $TABLE_NAME;
+SELECT COUNT(*) as rows_visible FROM "$TABLE_NAME";
 ROLLBACK;
 
 -- Test as authenticated user
@@ -75,7 +75,7 @@ ROLLBACK;
 BEGIN;
 SET LOCAL role TO authenticated;
 SET LOCAL request.jwt.claim.sub TO '00000000-0000-0000-0000-000000000001';
-SELECT COUNT(*) as rows_visible FROM $TABLE_NAME;
+SELECT COUNT(*) as rows_visible FROM "$TABLE_NAME";
 ROLLBACK;
 
 \echo ''
