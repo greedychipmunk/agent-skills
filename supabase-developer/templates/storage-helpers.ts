@@ -70,6 +70,8 @@ export async function uploadFiles(
 
 /**
  * Upload file with progress tracking
+ * Note: For large files (>6MB), this simulates progress but still uploads the full file at once.
+ * True chunked upload would require Edge Function or server-side implementation.
  */
 export async function uploadFileWithProgress(
   bucket: string,
@@ -78,32 +80,19 @@ export async function uploadFileWithProgress(
   onProgress: (progress: number) => void,
   options: UploadOptions = {}
 ): Promise<UploadResult> {
-  // For small files, use regular upload
-  if (file.size < 6 * 1024 * 1024) { // < 6MB
+  // Simulate progress for better UX
+  const progressInterval = setInterval(() => {
+    onProgress(Math.min(90, Math.random() * 80))
+  }, 200)
+
+  try {
     const result = await uploadFile(bucket, path, file, options)
+    clearInterval(progressInterval)
     onProgress(100)
     return result
-  }
-
-  // For larger files, use chunked upload (requires custom implementation)
-  // This is a simplified version
-  const chunkSize = 6 * 1024 * 1024 // 6MB chunks
-  const chunks = Math.ceil(file.size / chunkSize)
-  
-  for (let i = 0; i < chunks; i++) {
-    const start = i * chunkSize
-    const end = Math.min(start + chunkSize, file.size)
-    const chunk = file.slice(start, end)
-    
-    // Upload chunk (simplified - actual implementation would be more complex)
-    await uploadFile(bucket, `${path}.part${i}`, chunk, options)
-    
-    onProgress(Math.round(((i + 1) / chunks) * 100))
-  }
-
-  return {
-    path,
-    fullPath: `${bucket}/${path}`,
+  } catch (error) {
+    clearInterval(progressInterval)
+    throw error
   }
 }
 
