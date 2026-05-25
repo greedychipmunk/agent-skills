@@ -18,10 +18,25 @@ This skill includes a comprehensive collection of production-ready resources:
 ## Core Capabilities
 
 ### Luau Programming
-- **Modern Luau Features**: Utilize type annotations, generics, and performance optimizations
+- **Modern Luau Features**: Utilize type annotations, generics, the New Type Solver (general release), improved type inference/autocomplete, and performance optimizations
 - **Script Architecture**: Implement clean, modular code with proper separation of concerns
 - **Performance Optimization**: Write efficient scripts that handle large player counts
 - **Error Handling**: Robust error management and debugging techniques
+
+### Luau Type System Updates
+- **New Type Solver**: General release (no longer a Studio Beta); enabled by default for `nonstrict` and `nocheck` modes starting January 7, 2026
+- **Key Improvements**: Better type inference, fewer false positives, stronger generics support, and improved autocomplete
+- **Legacy Solver Timeline**: The legacy solver remains available through 2026, but it is slated for removal
+- **Migration Guidance**: Most code works without changes, but a few edge cases may need explicit type annotations or cleanup
+- **Best Practices**: Prefer explicit annotations on public APIs, use generics where appropriate, and lean on improved autocomplete for faster iteration
+
+```lua
+-- New Type Solver infers types more accurately
+local function processPlayer(player: Player)
+    local name: string = player.Name  -- inferred correctly
+    local team = player.Team  -- Team? properly inferred
+end
+```
 
 ### Game Systems Development
 - **Player Data Management**: DataStore implementation with backup systems (see [DataManager.lua](scripts/DataManager.lua))
@@ -79,24 +94,40 @@ This skill includes a comprehensive collection of production-ready resources:
 
 ## Common Patterns & Solutions
 
+### DataStore Access and Storage Updates
+- **Per-Experience Quotas**: Each experience gets its own DataStore read/write quota, and Roblox is enforcing these limits starting in early 2026
+- **Throttle Behavior**: Exceeding limits throttles requests instead of throwing hard errors, so code should gracefully retry or fall back
+- **Best Practices**: Batch operations, cache locally, and keep transient state in session data tables instead of writing every change immediately
+- **Studio Tooling**: Use **Data Stores Manager** in Roblox Studio to view, edit, and delete entries directly without publishing (`Studio → View → Data Stores Manager`)
+
 ### Data Persistence
 Complete implementation available in [DataManager.lua](scripts/DataManager.lua)
 
 ```lua
--- DataStore best practices with retry logic and caching
+-- DataStore best practices with retry logic, caching, and rate limiting awareness
 local DataStoreService = game:GetService("DataStoreService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PlayerDataModule = {}
 local dataStore = DataStoreService:GetDataStore("PlayerData_v1")
 local sessionData = {}
+local cachedData = {}
+
+local function safeGetAsync(dataStore, key)
+    local success, result = pcall(function()
+        return dataStore:GetAsync(key)
+    end)
+    if not success then
+        warn("DataStore request failed, using cached data")
+        return cachedData[key]
+    end
+    return result
+end
 
 function PlayerDataModule:LoadData(player)
-    local success, data = pcall(function()
-        return dataStore:GetAsync(player.UserId)
-    end)
+    local data = safeGetAsync(dataStore, player.UserId)
     
-    if success and data then
+    if data then
         sessionData[player.UserId] = data
     else
         -- Default data structure
@@ -108,9 +139,18 @@ function PlayerDataModule:LoadData(player)
         }
     end
     
+    cachedData[player.UserId] = sessionData[player.UserId]
     return sessionData[player.UserId]
 end
 ```
+
+### DataStore2 Migration Guidance
+- **Deprecation Status**: Berezaa/DataStore2 is deprecated; prefer native `DataStoreService` for new and existing projects
+- **Why Migrate**: Per-experience quotas and the built-in Data Stores Manager reduce the need for an extra caching layer
+- **Migration Steps**:
+  - Replace `DataStore2()` calls with `DataStoreService:GetDataStore()`
+  - Manage session caching manually with tables for transient state
+  - Use `UpdateAsync` for atomic updates instead of DataStore2's `:Update()` helper
 
 ### Remote Communication
 Complete implementation available in [RemoteManager.lua](scripts/RemoteManager.lua)
@@ -198,6 +238,7 @@ Comprehensive debugging resources available in [Debugging Guide](resources/debug
 - **Roblox Studio Debugger**: Breakpoints and variable inspection
 - **Performance Profiler**: CPU and memory usage analysis
 - **Network Monitor**: Remote event tracking and bandwidth usage
+- **Data Stores Manager**: View, edit, and delete DataStore entries directly in Studio for debugging and testing (`Studio → View → Data Stores Manager`)
 - **Error Logging**: Custom logging systems for production debugging
 
 ### Quick Reference
@@ -237,3 +278,6 @@ Essential commands and snippets available in [Quick Reference](resources/quick_r
 - **[Quick Reference](resources/quick_reference.md)** - Essential commands and code snippets
 
 This skill enables comprehensive Roblox game development from concept to launch, with focus on best practices, security, and player engagement. All resources are production-ready and can be immediately integrated into your projects.
+
+Version: 2.0
+Last Updated: May 2026

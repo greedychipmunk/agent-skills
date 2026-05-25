@@ -1,19 +1,19 @@
 ---
 name: medusajs-developer
-description: Specialized agent for MedusaJS development including custom modules, API routes, data models, workflows, scheduled jobs, and third-party integrations. Provides expert guidance on commerce platform architecture and plugin development.
+description: Specialized agent for MedusaJS v2.15+ development including custom modules, API routes, data models, workflows, scheduled jobs, and third-party integrations. Provides expert guidance on commerce platform architecture and plugin development.
 license: MIT
-compatibility: Requires Node.js 18+, TypeScript, and MedusaJS v2
+compatibility: Requires Node.js 20+, TypeScript, and MedusaJS v2.15+
 metadata:
   category: ecommerce
-  framework: medusajs
-  version: 2.x
+  framework: Medusa v2.15+
+  version: 2.15+
   expertise: commerce-modules, api-development, plugin-creation
 allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Grep, Glob, WebFetch]
 ---
 
 # MedusaJS Developer Agent Skill
 
-An expert agent specializing in MedusaJS development, focusing on building scalable e-commerce solutions with custom modules, API integrations, and third-party plugins.
+An expert agent specializing in MedusaJS v2.15+ development, focusing on building scalable e-commerce solutions with custom modules, API integrations, and third-party plugins.
 
 ## Core Capabilities
 
@@ -46,6 +46,56 @@ An expert agent specializing in MedusaJS development, focusing on building scala
 - **External APIs**: Connect with shipping, tax, and inventory services
 - **Webhooks**: Handle incoming webhooks from external systems
 - **Data Synchronization**: Sync data with external platforms
+
+## Medusa v2.15+ Updates
+
+### Auth & Security
+- Medusa v2.15+ includes built-in MFA primitives for auth flows.
+- Prefer module-managed TOTP, SMS, and recovery code challenges instead of rolling your own OTP storage.
+- Wire MFA into the Auth module by treating it as part of sign-in, enrollment, challenge, verify, and recovery flows.
+
+```ts
+// Pseudocode: branch on auth result and ask the Auth module to challenge/verify MFA
+const result = await authModule.authenticate(credentials)
+
+if (result.mfa_required) {
+  await authModule.mfa.challenge({
+    user_id: result.user_id,
+    method: "totp", // "sms" | "recovery_code"
+  })
+}
+```
+
+### Promotions
+- Promotion workflows can consume context hooks for conditional application.
+- Pass contextual data such as `customer_group`, `sales_channel_id`, `region`, or campaign metadata through workflows so promotion rules can evaluate it.
+- Example: apply a wholesale promotion only when `context.customer_group === "wholesale"`.
+
+### Catalog Search
+- Products now support native SKU search.
+- Use SKU filters in product search requests when looking up variants by merchant-facing or fulfillment-facing identifiers.
+- Example: search by SKU and keyword together to narrow a catalog query.
+
+```bash
+GET /store/products?query=hoodie&sku=HD-001-BLK-M
+```
+
+### Cloud & Platform
+- Use `mcloud proxy` for secure local-to-cloud tunneling when debugging Cloud environments or testing webhooks against a local app.
+- Use it when a third-party service needs a public callback URL but you want to keep the backend local.
+
+### Data Model Notes
+- Float attributes are now aligned in the data model; prefer the updated attribute types when modeling custom number fields.
+
+## Critical Migration Notes
+- Medusa v2.15.2 includes the MikroORM v6.6.12 security update and fixes the v6.13.6 snapshot regression.
+- If you're on v2.13.6+, upgrade before running production migrations and clean stale snapshots first:
+
+```bash
+npx medusa db:migrate --clean-snapshots
+```
+
+- Pin all `@medusajs/*` packages to the same release line during the upgrade and avoid partial version drift.
 
 ## Development Patterns
 
@@ -528,3 +578,6 @@ npx create-medusa-app@latest my-store
 - Developer Tools and CLI Commands
 
 This skill enables comprehensive MedusaJS development with focus on maintainable, scalable e-commerce solutions.
+
+Version: 2.0
+Last Updated: May 2026
