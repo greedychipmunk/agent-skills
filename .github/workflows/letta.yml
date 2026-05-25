@@ -1,16 +1,19 @@
 name: Letta Code
 
 on:
+  issues:
+    types: [opened, labeled, assigned]
   issue_comment:
     types: [created]
-  issues:
-    types: [opened, assigned]
+  pull_request:
+    types: [opened, labeled]
   pull_request_review_comment:
     types: [created]
 
 jobs:
   letta:
     runs-on: ubuntu-latest
+    if: github.actor == 'greedychipmunk'
     permissions:
       contents: write
       issues: write
@@ -23,3 +26,4 @@ jobs:
         with:
           letta_api_key: ${{ secrets.LETTA_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          assignee_trigger: letta-code
