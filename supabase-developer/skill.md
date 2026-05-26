@@ -7,7 +7,7 @@ description: Expert Supabase development with PostgreSQL, authentication, Row Le
 
 ## Overview
 
-This skill provides comprehensive expertise in building production-ready applications with **Supabase**, the open-source Firebase alternative. It covers database design, authentication, Row Level Security (RLS), file storage, Edge Functions, and real-time subscriptions.
+This skill provides comprehensive expertise in building production-ready applications with **Supabase**, the open-source Firebase alternative. It covers database design, authentication, Row Level Security (RLS), file storage, Edge Functions, and real-time subscriptions. Edge Functions now run on Deno 2.1 by default (full rollout August 2025), with local preview available since March 2025.
 
 ## Core Capabilities
 
@@ -41,11 +41,14 @@ This skill provides comprehensive expertise in building production-ready applica
 - **Signed URLs**: Temporary access tokens
 
 ### Edge Functions
-- **Deno Runtime**: TypeScript/JavaScript edge computing
+- **Deno 2.1 Runtime**: TypeScript/JavaScript edge computing with seamless npm imports, native TypeScript support, Web API compatibility, and better performance
+- **Dashboard Editor**: In-dashboard Edge Functions editor for quick updates and prototyping
+- **AI Assistant**: Built-in AI assistant for generating function code
 - **API Routes**: Custom backend logic
 - **Webhooks**: Event-driven integrations
 - **Scheduled Tasks**: Cron-based functions (pg_cron)
 - **Third-party APIs**: External service integrations
+- **No-Docker Deploy**: Deploy with `supabase functions deploy --no-docker` when Docker isn't available
 
 ### Realtime
 - **Database Changes**: Listen to INSERT, UPDATE, DELETE
@@ -277,16 +280,16 @@ supabase.removeChannel(channel)
 ### Edge Function Example
 
 ```typescript
-// supabase/functions/send-email/index.ts
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// supabase/functions/send-email/index.ts (Deno 2.1)
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -312,6 +315,17 @@ serve(async (req) => {
     )
   }
 })
+```
+
+### Edge Function Management API
+
+Use the Management API for programmatic deploys and updates in CI/CD pipelines or automated workflows.
+
+```bash
+curl -X POST "https://api.supabase.com/v1/projects/{ref}/functions" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "hello-world", "slug": "hello-world", "verify_jwt": true}'
 ```
 
 ## Best Practices
@@ -341,7 +355,7 @@ serve(async (req) => {
 - Use shared utilities in `_shared/`
 
 ### Development Workflow
-- Use Supabase CLI for local development
+- Use Supabase CLI for local development; use the dashboard editor and AI assistant for quick prototypes, and rely on the CLI or Management API for production workflows
 - Test RLS policies before deployment
 - Seed database for consistent testing
 - Use branching for schema changes
@@ -394,7 +408,7 @@ This skill includes executable scripts in the `scripts/` folder:
   ./scripts/create-function.sh <function-name>
   ```
 
-- **deploy-function.sh**: Deploy Edge Function to production
+- **deploy-function.sh**: Deploy Edge Function to production (supports `--no-docker` when Docker isn't available)
   ```bash
   ./scripts/deploy-function.sh <function-name> [--all]
   ```
@@ -449,12 +463,12 @@ This skill includes detailed reference guides in the `resources/` folder:
 - **authentication.md**: Auth flows, providers, sessions, and MFA
 - **row-level-security.md**: RLS policy patterns and multi-tenant security
 - **storage.md**: File storage, access control, and transformations
-- **edge-functions.md**: Deno runtime, deployment, and best practices
+- **edge-functions.md**: Deno 2.1 runtime, dashboard editor, AI assistant, Management API, deployment, and best practices
 - **realtime.md**: Subscriptions, broadcast, and presence
 - **client-libraries.md**: JavaScript, Python, and other client usage
 
 ---
 
 **Specialization**: Supabase Full-Stack Development
-**Version**: 1.0
-**Last Updated**: January 2026
+**Version**: 2.0
+**Last Updated**: May 2026
