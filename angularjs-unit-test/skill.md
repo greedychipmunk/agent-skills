@@ -7,23 +7,9 @@ description: Use this skill for AngularJS unit testing, maintenance, and migrati
 
 ## Overview
 
-This skill focuses on writing, refactoring, and maintaining unit tests for AngularJS applications, with guidance for teams keeping legacy code healthy while planning a move to modern Angular.
+This skill specializes in writing, refactoring, and maintaining high-quality unit tests for AngularJS (1.x) applications. It covers controllers, services, filters, directives, HTTP mocking, promises, and dependency injection — everything you need to keep an AngularJS codebase well-tested and reliable.
 
-## Legacy Status & Migration Guidance
-
-AngularJS reached end-of-life in December 2021. Treat it as a legacy maintenance platform:
-- No new features; only critical security fixes and targeted maintenance
-- New projects should use Angular 19+ (the modern Angular framework)
-- This skill exists to support teams maintaining existing AngularJS codebases and planning migrations
-
-**Migration path: AngularJS → Angular**
-- Modules / services / controllers → NgModules or standalone components, injectable services, and component classes
-- `$scope` / `$rootScope` → component state, `@Input()` / `@Output()`, and modern change detection
-- `$http` / `$resource` → `HttpClient`
-- Directives → components/directives with modern APIs
-- `$q` / digest cycle → RxJS, promises/async-await, and Angular lifecycle hooks
-- `$routeProvider` → Angular Router
-- Globals and ad-hoc DOM access → dependency injection and testable abstractions
+> **Note**: AngularJS reached end-of-life in December 2021. It receives only critical security fixes. New projects should use Angular 19+. For teams maintaining AngularJS codebases, this skill provides the latest testing patterns, tooling, and migration guidance. See [Migration Path](#migration-path-angularjs--angular) at the bottom of this document.
 
 ## Skill Capabilities
 
@@ -33,13 +19,13 @@ AngularJS reached end-of-life in December 2021. Treat it as a legacy maintenance
 - **Services**: Test factory/service dependencies, HTTP calls, and business logic
 - **Filters**: Validate filter transformations and edge cases
 - **Directives**: Test directive compilation, linking, and DOM manipulation
-- **HTTP Mocking**: Mock HTTP calls using `$httpBackend` for legacy Jasmine suites or Jest-friendly mocks for modern suites
+- **HTTP Mocking**: Mock HTTP calls using `$httpBackend` (Jasmine/Karma) or MSW/fetch mocks (Jest)
 - **Promises & Async**: Handle `$q`, deferred objects, and `$timeout`
 - **Dependency Injection**: Test with mocked and real dependencies
 - **Scope Management**: Test scope lifecycle, watchers, and event broadcasting
 - **Coverage Analysis**: Generate and interpret code coverage reports
 - **Test Organization**: Structure tests following best practices and maintainability principles
-- **Framework Choice**: Prefer Jest by default; keep Jasmine/Karma for legacy suites only
+- **Framework Choice**: Jest for new work and hybrid repos; Jasmine/Karma for existing suites
 
 ### Testing Patterns
 
@@ -417,6 +403,78 @@ describe('PromiseService', function() {
 });
 ```
 
+### Testing Component Directives
+
+AngularJS 1.5+ component directives (`bindings`, `controllerAs`) are the recommended pattern for new code and the easiest to migrate to Angular later.
+
+```javascript
+describe('userCard component', function() {
+  var $compile, $rootScope, element, scope;
+
+  beforeEach(module('myApp'));
+  beforeEach(inject(function(_$compile_, _$rootScope_) {
+    $compile = _$compile_;
+    $rootScope = _$rootScope_;
+    scope = $rootScope.$new();
+    scope.user = { name: 'Alice', role: 'admin' };
+  }));
+
+  it('should render user name and role', function() {
+    element = $compile('<user-card user="user"></user-card>')(scope);
+    scope.$digest();
+
+    var isolated = element.isolateScope().$ctrl;
+    expect(isolated.user.name).toBe('Alice');
+    expect(element.text()).toContain('admin');
+  });
+
+  it('should call onSelect when clicked', function() {
+    scope.onSelect = jasmine.createSpy('onSelect');
+    element = $compile('<user-card user="user" on-select="onSelect(user)"></user-card>')(scope);
+    scope.$digest();
+
+    element.isolateScope().$ctrl.onSelect({ user: scope.user });
+    expect(scope.onSelect).toHaveBeenCalledWith(scope.user);
+  });
+});
+```
+
+### Testing $httpBackend with Request Matchers
+
+For APIs with dynamic segments or query parameters, use regex or function matchers instead of exact URL strings:
+
+```javascript
+// Match any GET to /api/users with query params
+$httpBackend.expectGET(/\/api\/users\?.*page=/).respond(200, mockResponse);
+
+// Match by function
+$httpBackend.expectGET(function(url) {
+  return url.indexOf('/api/users') === 0 && url.indexOf('page=') > -1;
+}).respond(200, mockResponse);
+```
+
+### Testing $on / $broadcast Events
+
+```javascript
+describe('event-driven service', function() {
+  var $rootScope, service;
+
+  beforeEach(inject(function(_$rootScope_, _EventService_) {
+    $rootScope = _$rootScope_;
+    service = _EventService_;
+  }));
+
+  it('should react to user:updated event', function() {
+    var handler = jasmine.createSpy('handler');
+    $rootScope.$on('user:updated', handler);
+
+    $rootScope.$broadcast('user:updated', { id: 42 });
+    expect(handler).toHaveBeenCalled();
+    expect(handler.calls.argsFor(0)[1]).toEqual({ id: 42 });
+  });
+});
+```
+
 ## Debugging Tests
 
 ### Jasmine Debugging
@@ -523,15 +581,66 @@ pipeline {
 - Test error conditions and edge cases
 - Mock external dependencies properly
 
+## Modern Runtime Compatibility
+
+AngularJS was built for an older Node.js and browser ecosystem, but it still runs on modern runtimes with the right configuration.
+
+### Node.js 22 LTS
+- AngularJS 1.8.x runs on Node 22 LTS without modification
+- If your tests use Karma with a real browser, use `karma-chrome-launcher` with headless Chrome
+- For Jest: `testEnvironment: 'jsdom'` handles the browser globals — no real browser needed
+
+### Headless Chrome in CI
+```yaml
+# GitHub Actions — headless Chrome with Karma
+- uses: actions/setup-chrome@v1
+  with:
+    chrome-version: stable
+- run: npm test
+```
+
+```javascript
+// karma.conf.js — headless Chrome for CI
+browsers: ['ChromeHeadlessNoSandbox'],
+customLaunchers: {
+  ChromeHeadlessNoSandbox: {
+    base: 'ChromeHeadless',
+    flags: ['--no-sandbox']
+  }
+}
+```
+
+### Common Pitfalls on Modern Runtimes
+- **V8 strict mode**: AngularJS code relying on implicit globals or `arguments.callee` will fail in strict mode. Use `'use strict'` in test files to catch these early.
+- **jsdom vs. real browser**: Some directive tests that depend on real layout or CSS computation may not work in jsdom. Run those with Karma + headless Chrome instead.
+- **npm audit failures**: AngularJS dependencies may have known vulnerabilities. Use `npm audit --production` to separate real risks from dev-only warnings, and consider `overrides` in `package.json` to pin patched transitive dependencies.
+
+## Migration Path: AngularJS → Angular
+
+When the time comes to move off AngularJS, here is the conceptual mapping:
+
+| AngularJS | Angular 19+ |
+|---|---|
+| Modules / controllers | Standalone components or NgModules, injectable services |
+| `$scope` / `$rootScope` | Component state, `@Input()` / `@Output()`, signals |
+| `$http` / `$resource` | `HttpClient` |
+| Directives | Components and directives with modern APIs |
+| `$q` / digest cycle | RxJS, promises/async-await, signals |
+| `$routeProvider` | Angular Router |
+| `angular.module()` DI | Tree-shakable providers, `inject()` |
+| Globals and ad-hoc DOM | Dependency injection and testable abstractions |
+
+**Hybrid migration**: Use `@angular/upgrade` to run AngularJS and Angular side by side. Migrate component-by-component rather than rewriting the whole app at once. The AngularJS test suite stays active throughout — Jest is the best runner for hybrid repos because it handles both AngularJS and Angular test files.
+
 ## Next Steps
 
 1. **Start Small**: Write tests for a single component
-2. **Choose the Right Runner**: Keep Jasmine/Karma only for legacy maintenance; prefer Jest for new work
+2. **Choose the Right Runner**: Keep Jasmine/Karma only for existing suites; prefer Jest for new work and hybrid repos
 3. **Understand Patterns**: Study the testing patterns guide
 4. **Use Templates**: Reference template files for your component type
 5. **Refine**: Improve tests based on coverage and feedback
 6. **Automate**: Integrate tests into your CI/CD pipeline
-7. **Plan the Migration**: Map AngularJS modules, controllers, and `$scope` usage to Angular components and services
+7. **Plan the Migration**: When ready, use `@angular/upgrade` for incremental migration — your test suite migrates with you
 
 ---
 
