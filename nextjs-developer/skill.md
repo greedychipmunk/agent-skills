@@ -7,7 +7,7 @@ description: Expert Next.js development with App Router, Server Components, and 
 
 ## Overview
 
-This skill provides comprehensive expertise in building production-ready Next.js applications using the **App Router** (Next.js 13+). It covers Server Components, data fetching patterns, routing, API routes, caching, and performance optimization.
+This skill provides comprehensive expertise in building production-ready Next.js applications using the **App Router** (Next.js 15+). It covers Server Components, React 19 support, data fetching patterns, routing, API routes, caching, and performance optimization.
 
 ## Core Capabilities
 
@@ -21,7 +21,7 @@ This skill provides comprehensive expertise in building production-ready Next.js
 
 ### Data Fetching
 - **Server-side fetching**: Direct database/API access in Server Components
-- **Caching strategies**: Static, dynamic, and incremental regeneration
+- **Caching strategies**: Dynamic rendering by default, explicit caching, and incremental regeneration
 - **Revalidation**: Time-based and on-demand cache invalidation
 - **Parallel fetching**: Optimized data loading patterns
 
@@ -100,21 +100,21 @@ export function Counter() {
 
 ### Data Fetching Patterns
 
-#### Static Generation (Default)
+#### Dynamic Rendering (Default)
 ```typescript
-// Cached indefinitely (can be revalidated)
+// In Next.js 15+, fetch is uncached by default (implicit cache: 'no-store')
 async function Page() {
   const data = await fetch('https://api.example.com/data')
   return <div>{data}</div>
 }
 ```
 
-#### Dynamic Rendering
+#### Static Generation (Opt-in)
 ```typescript
-// Opt out of caching
+// Explicitly opt into caching
 async function Page() {
   const data = await fetch('https://api.example.com/data', {
-    cache: 'no-store'
+    cache: 'force-cache',
   })
   return <div>{data}</div>
 }
@@ -124,11 +124,13 @@ async function Page() {
 ```typescript
 async function Page() {
   const data = await fetch('https://api.example.com/data', {
-    next: { revalidate: 3600 } // Revalidate every hour
+    next: { revalidate: 3600 }, // Revalidate every hour
   })
   return <div>{data}</div>
 }
 ```
+
+> Note: The client router cache is also uncached by default in Next.js 15, replacing the old 30s/5m defaults.
 
 ### Server Actions
 ```typescript
@@ -160,11 +162,135 @@ export default function NewPost() {
 }
 ```
 
+### Partial Prerendering (PPR)
+- PPR combines a static shell with dynamic streaming in a single HTTP request.
+- It is production-ready in Next.js 15+ and was experimental in Next.js 14.
+- Enable incremental adoption with `experimental.ppr: 'incremental'` in `next.config.js`, or use `ppr: true` when you want full PPR.
+- Use `Suspense` boundaries to define dynamic holes inside static shells.
+- Adopt PPR route by route so you can gradually expand coverage without rewriting the whole app.
+
+```typescript
+// app/page.tsx — static shell with dynamic hole
+export const experimental_ppr = true
+
+export default function Page() {
+  return (
+    <main>
+      <StaticHeader />
+      <Suspense fallback={<ProductSkeleton />}>
+        <DynamicProductList />
+      </Suspense>
+    </main>
+  )
+}
+```
+
+### Turbopack
+- Turbopack is stable for `next dev` in Next.js 15 and for `next build` in Next.js 15.3+.
+- The production build path passes 8,298 test suite cases.
+- Use `next dev --turbopack` and `next build --turbopack` to opt in.
+- It can be up to 10x faster than Webpack for dev server startup.
+- Some Webpack loaders and plugins may still need migration work.
+
+```bash
+next dev --turbopack
+next build --turbopack
+```
+
+### React 19 Features
+- React 19 is the default runtime in Next.js 15+ App Router projects.
+- Use `use()` to consume promises and contexts during render.
+- Server Actions are stable and no longer experimental.
+- Use `useFormStatus()` for form state without prop drilling.
+- Use `useOptimistic()` for optimistic UI updates.
+
+```typescript
+import { use } from "react"
+import { useFormStatus } from "react-dom"
+import { useOptimistic } from "react"
+
+function ProductName({ productPromise }: { productPromise: Promise<{ name: string }> }) {
+  const product = use(productPromise)
+  return <h1>{product.name}</h1>
+}
+```
+
+### `after()` Post-Response Work
+- Next.js 15 introduces `after()` for post-response work.
+- Use it for logging, analytics, and other non-critical tasks after the response is sent.
+- Import it from `next/server`.
+
+```typescript
+import { after } from 'next/server'
+
+after(() => {
+  logAnalytics()
+})
+```
+
+### Navigation Hooks (Next.js 15.4)
+- `useLinkStatus()` helps show inline link-loading indicators.
+- `onNavigate` lets you track or block client-side navigation.
+- `useLinkStatus()` is a client hook from `next/link` and returns `{ pending }`.
+- `onNavigate` is a `Link` prop for SPA navigations only.
+
+```typescript
+'use client'
+
+import Link, { useLinkStatus } from 'next/link'
+
+function LinkHint() {
+  const { pending } = useLinkStatus()
+  return <span aria-hidden>{pending ? 'Loading…' : null}</span>
+}
+
+export function Nav() {
+  return (
+    <nav>
+      <Link href="/dashboard" prefetch={false} onNavigate={() => trackNavigation('/dashboard')}>
+        Dashboard <LinkHint />
+      </Link>
+    </nav>
+  )
+}
+```
+
+### next.config.js Patterns
+- Keep experimental flags only when needed; several features have graduated to stable in Next.js 15+.
+- Use `experimental.ppr: 'incremental'` for route-by-route PPR adoption.
+- Use `ppr: true` only when you want a fully PPR-enabled app.
+- Turbopack is enabled via CLI flags, not a `next.config.js` switch.
+
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  experimental: {
+    ppr: 'incremental',
+  },
+  // For full PPR:
+  // ppr: true,
+}
+
+export default nextConfig
+```
+
+```json
+{
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack"
+  }
+}
+```
+
 ## Best Practices
 
 ### Performance
 - Use Server Components by default
-- Implement proper caching strategies
+- Prefer dynamic rendering unless you explicitly need caching
+- Use PPR for fast static shells with dynamic holes
 - Optimize images with `next/image`
 - Use `next/font` for font optimization
 - Implement streaming with Suspense boundaries
@@ -265,5 +391,5 @@ This skill includes detailed reference guides in the `resources/` folder:
 ---
 
 **Specialization**: Next.js App Router Development
-**Version**: 1.0
-**Last Updated**: January 2026
+**Version**: 2.0
+**Last Updated**: May 2026
