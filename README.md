@@ -55,6 +55,7 @@ Every skill follows the same convention so agents can discover and load them pre
 ---
 name: your-skill-name
 description: One-line description of what this skill provides
+license: MIT
 ---
 
 # Your Skill Name
