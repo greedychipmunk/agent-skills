@@ -14,6 +14,7 @@ A curated collection of specialized skills for AI coding agents. Each skill pack
 | [Docker](./docker) | Build, run, debug, and manage Docker containers, compose files, networking, and registries | DevOps |
 | [GitHub](./github) | GitHub operations via `gh` CLI — issues, PRs, CI runs, code review, and API queries | Developer Tools |
 | [GitHub CI](./github-ci) | Write and maintain GitHub Actions CI workflows, triggers, runners, and caching | CI/CD |
+| [Software Factory Creator](./software-factory-creator) | Bootstrap a minimum viable software factory with project instructions, security and quality gates, CI, and bounded autonomy | Developer Tools |
 | [Helm](./helm) | Package and deploy Kubernetes applications with Helm charts and releases | DevOps |
 | [kubectl](./kubectl) | Manage Kubernetes resources, contexts, and workloads with kubectl | DevOps |
 | [MCP Builder](./mcp-builder) | Create MCP (Model Context Protocol) servers for LLM tool integration | AI Agents |
