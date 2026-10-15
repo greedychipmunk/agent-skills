@@ -1,6 +1,11 @@
 ---
 name: elizaos-runtime-diagnostics
 description: Diagnoses elizaOS startup, plugin, database, service, and model readiness failures across local runtimes and Cloud hosts. Use for boot errors, missing providers, failed connectors, unhealthy agents, migration blocks, or version-sensitive runtime troubleshooting; includes a secret-free offline presence and manifest inventory helper.
+license: MIT
+compatibility: Python 3.10+ on Linux/macOS for the optional offline helper. Operational commands must match the target installation.
+metadata:
+  author: greedychipmunk
+  version: "1.0"
 ---
 
 # elizaOS Runtime Diagnostics
@@ -39,6 +44,9 @@ upgrade, build, or execute upstream code just to diagnose it.
    is not a sandbox against concurrent directory replacement. Presence means
    name exists, even if empty; it does not establish validity, activation, or
    runtime inheritance. Only known script **names**, never bodies, are reported.
+   Exit 0 means the requested inventory was built, 1 means at least one manifest
+   could not be inspected, and 2 means invalid arguments/limits. None proves
+   runtime readiness or credential validity.
 3. Do not infer that a core runtime automatically reads arbitrary process
    environment. Trace host configuration, plugin configuration, and provider
    registration at the installed revision before changing a setting.

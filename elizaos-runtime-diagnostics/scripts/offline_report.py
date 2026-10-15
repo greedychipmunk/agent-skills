@@ -11,12 +11,26 @@ import sys
 
 MAX_BYTES = 1024 * 1024
 KNOWN_SCRIPTS = (
-    "start", "dev", "dev:local", "build", "typecheck", "lint:check",
-    "test", "test:e2e", "test:integration", "test:server", "test:core",
-    "test:plugins", "migrate", "migrate:generate", "db:cloud:migrate",
+    "start",
+    "dev",
+    "dev:local",
+    "build",
+    "typecheck",
+    "lint:check",
+    "test",
+    "test:e2e",
+    "test:integration",
+    "test:server",
+    "test:core",
+    "test:plugins",
+    "migrate",
+    "migrate:generate",
+    "db:cloud:migrate",
 )
 ENV_NAME = re.compile(r"[A-Z_][A-Z0-9_]{0,127}\Z")
-VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?(?:\+[A-Za-z0-9.-]+)?\Z")
+VERSION = re.compile(
+    r"[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?(?:\+[A-Za-z0-9.-]+)?\Z"
+)
 
 
 class InvalidManifest(Exception):
@@ -30,6 +44,10 @@ def unique_object(pairs):
             raise InvalidManifest()
         result[key] = value
     return result
+
+
+def reject_constant(_):
+    raise InvalidManifest()
 
 
 def read_manifest(filename):
@@ -55,7 +73,9 @@ def read_manifest(filename):
             os.close(fd)
         if len(content) > MAX_BYTES:
             return {"status": "too_large"}
-        data = json.loads(content, object_pairs_hook=unique_object)
+        data = json.loads(
+            content, object_pairs_hook=unique_object, parse_constant=reject_constant
+        )
     except (OSError, ValueError, RecursionError, InvalidManifest):
         return {"status": "unreadable_or_invalid_json"}
     if not isinstance(data, dict):
@@ -66,9 +86,14 @@ def read_manifest(filename):
     version = data.get("version")
     return {
         "status": "ok",
-        "version": version if isinstance(version, str) and len(version) <= 80
-        and VERSION.fullmatch(version) else None,
-        "known_scripts": [key for key in KNOWN_SCRIPTS if isinstance(scripts.get(key), str)],
+        "version": version
+        if isinstance(version, str)
+        and len(version) <= 80
+        and VERSION.fullmatch(version)
+        else None,
+        "known_scripts": [
+            key for key in KNOWN_SCRIPTS if isinstance(scripts.get(key), str)
+        ],
         "node_engine_declared": isinstance(data.get("engines"), dict)
         and "node" in data["engines"],
         "package_manager_declared": "packageManager" in data,
@@ -87,20 +112,37 @@ def report(env_names=(), manifests=(), environ=None):
     present = requested.intersection(iter(environ)) if requested else set()
     return {
         "schema_version": 1,
-        "environment": {name: {"present": name in present} for name in sorted(requested)},
-        "manifests": [dict(input_index=index, **read_manifest(path))
-                      for index, path in enumerate(manifests)],
-        "limitations": ["presence_is_not_validity", "no_runtime_or_network_checks",
-                        "manifest_commands_not_executed"],
+        "environment": {
+            name: {"present": name in present} for name in sorted(requested)
+        },
+        "manifests": [
+            dict(input_index=index, **read_manifest(path))
+            for index, path in enumerate(manifests)
+        ],
+        "limitations": [
+            "presence_is_not_validity",
+            "no_runtime_or_network_checks",
+            "manifest_commands_not_executed",
+        ],
     }
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
-    parser.add_argument("--env", action="append", default=[], metavar="NAME",
-                        help="Report only whether name exists (empty still counts).")
-    parser.add_argument("--manifest", action="append", default=[], metavar="PACKAGE_JSON",
-                        help="Inspect explicit package.json, never script bodies.")
+    parser.add_argument(
+        "--env",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help="Report only whether name exists (empty still counts).",
+    )
+    parser.add_argument(
+        "--manifest",
+        action="append",
+        default=[],
+        metavar="PACKAGE_JSON",
+        help="Inspect explicit package.json, never script bodies.",
+    )
     args = parser.parse_args()
     try:
         output = report(args.env, args.manifest)
