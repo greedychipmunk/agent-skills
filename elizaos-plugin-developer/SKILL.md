@@ -1,6 +1,10 @@
 ---
 name: elizaos-plugin-developer
 description: Develops, debugs, migrates, tests, and packages elizaOS TypeScript plugins, actions, providers, evaluators, and services. Use when extending @elizaos/core, integrating external capabilities, fixing plugin lifecycle or registration, or reconciling legacy plugin docs with current source contracts.
+license: MIT
+metadata:
+  author: greedychipmunk
+  version: "1.0"
 ---
 
 # elizaOS Plugin Developer

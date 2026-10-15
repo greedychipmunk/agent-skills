@@ -15,6 +15,7 @@ A curated collection of specialized skills for AI coding agents. Each skill pack
 | [Datadog](./datadog) | Query Datadog observability data — logs, metrics, monitors, dashboards, APM, and incidents | Observability |
 | [Docker](./docker) | Build, run, debug, and manage Docker containers, compose files, networking, and registries | DevOps |
 | [elizaOS Character Builder](./elizaos-character-builder) | Author version-correct agent personas, character JSON, conversation examples, and safe capability configuration | AI Agents |
+| [elizaOS Plugin Developer](./elizaos-plugin-developer) | Build, migrate, test, and package version-compatible elizaOS actions, providers, evaluators, and services | AI Agents |
 | [GitHub](./github) | GitHub operations via `gh` CLI — issues, PRs, CI runs, code review, and API queries | Developer Tools |
 | [GitHub CI](./github-ci) | Write and maintain GitHub Actions CI workflows, triggers, runners, and caching | CI/CD |
 | [Helm](./helm) | Package and deploy Kubernetes applications with Helm charts and releases | DevOps |
