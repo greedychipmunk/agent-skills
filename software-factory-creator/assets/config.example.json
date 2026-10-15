@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "project": "REPLACE_ME",
+  "runtimes": {"python": "REPLACE_ME"},
+  "commands": {
+    "install": {
+      "argv": ["REPLACE_ME"],
+      "cwd": ".",
+      "timeout_seconds": 600,
+      "evidence": "REPLACE_ME: lockfile and reviewed setup command"
+    },
+    "format": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 120,
+      "evidence": "REPLACE_ME: config or manifest location; check-only, no autofix"
+    },
+    "lint": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 120,
+      "evidence": "REPLACE_ME: config or manifest location"
+    },
+    "typecheck": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 120,
+      "evidence": "REPLACE_ME: config or manifest location"
+    },
+    "test": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 300,
+      "evidence": "REPLACE_ME: real tests discovered; non-watch command"
+    },
+    "build": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 300,
+      "evidence": "REPLACE_ME: manifest or existing CI build command"
+    },
+    "secrets": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 120,
+      "evidence": "REPLACE_ME: scanner pinned and configured for worktree plus history/PR range"
+    },
+    "dependencies": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 120,
+      "evidence": "REPLACE_ME: lockfile scanner, fail threshold and network requirements"
+    },
+    "sast": {
+      "argv": ["REPLACE_ME"], "cwd": ".", "timeout_seconds": 120,
+      "evidence": "REPLACE_ME: static security analysis tool and reviewed rules"
+    }
+  },
+  "setup": ["install"],
+  "gates": {
+    "format": {"commands": ["format"]},
+    "lint": {"commands": ["lint"]},
+    "typecheck": {"commands": ["typecheck"]},
+    "test": {"commands": ["test"]},
+    "build": {"commands": ["build"]},
+    "secrets": {"commands": ["secrets"]},
+    "dependencies": {"commands": ["dependencies"]},
+    "sast": {"commands": ["sast"]}
+  },
+  "ci": {"provider": "github", "path": ".github/workflows/factory.yml"}
+}

@@ -1,0 +1,28 @@
+# Reviewed official actions/checkout v6.1.0 ref; reverify before adoption.
+# Add pinned native runtime/tool installation BEFORE the factory command.
+# This is a CI skeleton until those project-specific steps are verified.
+name: Factory
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: factory-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Factory / verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify factory and project gates
+        run: python3 .factory/check.py --run --setup
