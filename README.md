@@ -10,19 +10,23 @@ A curated collection of specialized skills for AI coding agents. Each skill pack
 | [AngularJS Unit Testing](./angularjs-unit-test) | Jasmine and Jest testing for AngularJS controllers, services, filters, and directives | Testing |
 | [Ansible](./ansible) | Automate configuration management and application deployment with Ansible | DevOps |
 | [Argo CD](./argocd) | Deploy Kubernetes apps declaratively with Argo CD applications and projects | DevOps |
+| [Astryx](./astryx) | Generate Astryx design system components, themes, and layouts for React 19 applications | Design System |
+| [Blog Manager](./blog-manager) | Autonomous blog manager that proposes topics, drafts articles, and skips topics for Leaflet.pub | AI Agents |
 | [Datadog](./datadog) | Query Datadog observability data — logs, metrics, monitors, dashboards, APM, and incidents | Observability |
 | [Docker](./docker) | Build, run, debug, and manage Docker containers, compose files, networking, and registries | DevOps |
 | [GitHub](./github) | GitHub operations via `gh` CLI — issues, PRs, CI runs, code review, and API queries | Developer Tools |
 | [GitHub CI](./github-ci) | Write and maintain GitHub Actions CI workflows, triggers, runners, and caching | CI/CD |
-| [Software Factory Creator](./software-factory-creator) | Bootstrap a minimum viable software factory with project instructions, security and quality gates, CI, and bounded autonomy | Developer Tools |
 | [Helm](./helm) | Package and deploy Kubernetes applications with Helm charts and releases | DevOps |
 | [kubectl](./kubectl) | Manage Kubernetes resources, contexts, and workloads with kubectl | DevOps |
 | [MCP Builder](./mcp-builder) | Create MCP (Model Context Protocol) servers for LLM tool integration | AI Agents |
 | [MedusaJS Developer](./medusajs-developer) | Medusa v2 modules, API routes, data models, workflows, and plugin development | E-commerce |
+| [Mermaid](./mermaid) | Generate and validate Mermaid.js diagrams — flowcharts, sequence, Gantt, ER, and all other diagram types | Diagrams |
 | [Next.js Developer](./nextjs-developer) | App Router, Server Components, data fetching, routing, caching, and performance optimization | Web Framework |
 | [Pulumi](./pulumi) | Manage cloud infrastructure with Pulumi using general-purpose programming languages | IaC |
 | [Roblox Game Developer](./roblox-game-developer) | Luau scripting, game mechanics, UI/UX design, and monetization strategies | Game Development |
 | [Sentry](./sentry) | Inspect Sentry issues and events, summarize production errors, and pull health data | Observability |
+| [Software Factory Creator](./software-factory-creator) | Bootstrap a minimum viable software factory with project instructions, security and quality gates, CI, and bounded autonomy | Developer Tools |
+| [Standard Site](./standard-site) | Convert data into Standard.site AT Protocol lexicon records and validate them against official schemas | Publishing |
 | [Supabase Developer](./supabase-developer) | PostgreSQL, authentication, Row Level Security, Storage, Edge Functions, and Realtime | Backend / BaaS |
 | [Terraform](./terraform) | Plan, apply, and manage infrastructure with Terraform and HCL configuration | IaC |
 
