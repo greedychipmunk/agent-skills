@@ -1,0 +1,90 @@
+# Herdr plugin manifest template. Contracts verified against Herdr 0.9.5.
+# Copy into a plugin directory as herdr-plugin.toml and edit.
+# Full field reference: references/manifest.md in this skill.
+
+# Required. ASCII letters, digits, ':', '.', '_', '-'; max 120 chars.
+# Dots are allowed here but never in action, pane, or link-handler ids.
+id = "example.my-plugin"
+
+# Required, non-empty after trimming.
+name = "My Plugin"
+
+# Required, non-empty. The plugin's own version.
+version = "0.1.0"
+
+# Required. Semantic version; must not exceed the installed Herdr version or
+# link/install fails with plugin_requires_newer_herdr. Set it to the oldest
+# Herdr version that supports every manifest field and API you use.
+min_herdr_version = "0.9.5"
+
+# Optional. Dropped when empty or whitespace-only.
+description = "What this plugin does"
+
+# Optional but strongly recommended: "linux", "macos", "windows".
+# Omitting it links with a warning; an empty array is a hard error.
+platforms = ["linux", "macos", "windows"]
+
+# Optional build commands. Run only by `herdr plugin install` from GitHub,
+# after confirmation and before registration. `herdr plugin link` never runs
+# them. Document required toolchains (npm, cargo, ...) yourself; Herdr does
+# not install them.
+[[build]]
+command = ["npm", "ci"]
+
+[[build]]
+platforms = ["linux", "macos"]
+command = ["npm", "run", "build"]
+
+# Optional one-shot startup hook. Runs once per enabled plugin after session
+# restore and socket readiness; asynchronous; failure does not stop the
+# server. Receives HERDR_PLUGIN_EVENT=startup.
+[[startup]]
+command = ["node", "dist/restore.js"]
+
+# Optional action. Local id: ASCII letters, digits, ':', '_', '-' (no dots),
+# max 120 chars, unique within the plugin. Invoked as <plugin-id>.<action-id>.
+# contexts: global, workspace, tab, pane, selection.
+[[actions]]
+id = "apply"
+title = "Apply layout"
+contexts = ["workspace"]
+command = ["node", "dist/apply.js"]
+
+# Optional event hook. `on` must be a known event name; unknown names only
+# produce warnings. The 22 known names are listed in references/manifest.md.
+# Receives HERDR_PLUGIN_EVENT_JSON.
+[[events]]
+on = "worktree.created"
+command = ["node", "dist/on-worktree.js"]
+
+# Optional pane entrypoint. placement: overlay (default), popup, split, tab,
+# zoomed. width/height only with placement = "popup": integer cells or a
+# "1%".."100%" string.
+[[panes]]
+id = "board"
+title = "Project board"
+placement = "popup"
+width = "80%"
+height = 20
+command = ["node", "dist/board.js"]
+
+# Optional link handler. pattern is a Rust regex compiled at validation time.
+# action must reference an action declared in this manifest. Fires on
+# Control-click (all platforms, including macOS) while ui.mouse_capture is
+# enabled.
+[[link_handlers]]
+id = "github-issue"
+title = "Open GitHub issue"
+pattern = "^https://github\\.com/[^/]+/[^/]+/(issues|pull)/[0-9]+$"
+action = "apply"
+
+# NOTE: keybindings are NOT part of the manifest. A [[keys.command]] block in
+# herdr-plugin.toml is silently ignored on 0.9.5. Users bind keys to plugin
+# actions in their own config.toml:
+#
+#   [[keys.command]]
+#   key = "prefix+l"
+#   type = "plugin_action"
+#   command = "example.my-plugin.apply"
+#
+# Document the recommended binding in your plugin's README instead.
