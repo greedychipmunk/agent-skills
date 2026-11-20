@@ -1,71 +1,82 @@
 ---
 name: dev-api
-description: Exercise the MediaCMS REST API against a running development instance for smoke tests, upload validation, and auth checks. Use when verifying /api/v1 endpoints, media upload metadata, session or basic auth, or Swagger-driven manual testing on localhost.
-license: AGPL-3.0
+description: Use, test, and integrate against the MediaCMS REST API v1 — media listing/upload/edit/delete, actions, bulk actions, comments, playlists, categories, tags, search, users, encode profiles, and migrations endpoints. Use when scripting uploads or metadata updates, authenticating (session, HTTP Basic, or DRF token), debugging 401/403 permission errors, reading Swagger schemas, or using the bundled cli-tool.
+license: MIT
 metadata:
-  author: mrjoshuap
+  author: greedychipmunk
   version: "1.0"
-  source: https://github.com/mrjoshuap-hq/mediacms/tree/mediacms-next/skills/dev-api
 ---
 
-# Dev API (live instance)
+# MediaCMS REST API
 
-> **Scope:** targets the [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms) fork (`mediacms-next` branch). Repo paths such as `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in that repository checkout; sibling skills are referenced by name from this `mediacms` collection.
+> **Scope:** targets [mediacms-io/mediacms](https://github.com/mediacms-io/mediacms) v9.6.1 (commit `99a1801`, branch `main`). Endpoints resolve at the site root of a running installation.
 
-Use this for **manual / agent smoke** against a running stack. Automated coverage belongs in pytest (skill `test-ci`).
+## Authentication
 
-## Prerequisites
+Three interchangeable schemes:
 
-- Stack up (`make docker-up`); prefer http://localhost:80
-- Default superuser: `admin` / `admin`
-- OpenAPI/Swagger: http://localhost/swagger/ (ReDoc also under `/docs/` paths — don’t confuse with MkDocs `/documentation/`)
+1. **Session** — log in through the UI, reuse the cookie
+2. **HTTP Basic** — works on all API views (`Authorization: Basic base64(user:pass)`)
+3. **DRF token** — `GET /api/v1/user/token` with Basic auth returns `{"token": "..."}`; then send `Authorization: Token <token>`
 
-## Auth
+`GET /api/v1/whoami` (Basic auth) returns the authenticated user — the quickest credential check.
 
-- Session auth (browser cookie after login) or **HTTP basic** for curl/scripts
-- Permissions follow portal settings and roles (skill `rbac-permissions`)
+## Endpoint map
+
+| Endpoint | Methods | Notes |
+| -------- | ------- | ----- |
+| `/api/v1/media` | GET, POST | GET list (`page`, `author`, `show=recommended|featured|latest`); POST = upload (multipart `media_file`) |
+| `/api/v1/media/{friendly_token}` | GET, POST, PUT, DELETE | Detail; POST/PUT edit metadata, DELETE removes |
+| `/api/v1/media/{token}/actions` | POST | `{"type": "like"\|"dislike"\|"report"\|"feature", ...}` |
+| `/api/v1/media/user/bulk_actions` | POST | `media_ids` + `action` (playlist/category/tags/state/owner/ownership) |
+| `/api/v1/media/{token}/comments` | GET, POST | Comment list/create |
+| `/api/v1/media/{token}/chapters` | POST | Video chapters |
+| `/api/v1/media/{token}/trim_video` | POST | Requires `ALLOW_VIDEO_TRIMMER` |
+| `/api/v1/media/{token}/pdf` | GET | PDF viewer |
+| `/api/v1/search` | GET | Search media |
+| `/api/v1/categories`, `/api/v1/categories/{uid}` | GET | `contributor` variant lists RBAC-editable ones |
+| `/api/v1/tags`, `/api/v1/comments`, `/api/v1/playlists` | GET | Listings |
+| `/api/v1/playlists/{friendly_token}` | GET, POST | Playlist detail/edit |
+| `/api/v1/user/action/{action}` | POST | User actions |
+| `/api/v1/users`, `/api/v1/users/{username}` | GET | User list/detail |
+| `/api/v1/whoami`, `/api/v1/user/token`, `/api/v1/login` | GET/POST | Auth helpers |
+| `/api/v1/encode_profiles/` | GET | Active encode profiles |
+| `/api/v1/tasks`, `/api/v1/tasks/{token}` | GET | Encoding task status |
+| `/api/v1/manage_media|manage_comments|manage_users` | GET | Editor/manager/admin views |
+| `/api/v1/media-auth` | GET | Protected-media auth handshake (nginx `X-Accel`) |
+| `/api/v1/migrations` | GET, POST | Migration jobs (superuser; skill `migrations`) |
+
+Full parameter details: [references/endpoints.md](references/endpoints.md). Upload and action payloads: [references/upload-and-actions.md](references/upload-and-actions.md).
+
+## Upload essentials
 
 ```bash
-# Who am I / session check (adjust path if needed)
-curl -s -u admin:admin http://localhost/api/v1/user
-
-# List media
-curl -s -u admin:admin http://localhost/api/v1/media
+curl -u user:pass -F media_file=@video.mp4 -F title="Title" \
+     -F description="Desc" http://localhost/api/v1/media
 ```
 
-## Media upload smoke
+- Multipart POST with `media_file` plus optional `title`, `description`, `new_tags` (comma list), `category_uids`/`category_titles`, `state` (public/private/unlisted), `license`
+- Response contains `friendly_token`; encoding runs asynchronously — poll `encoding_status` on the detail endpoint or `/api/v1/tasks/{friendly_token}`
+- Gated by `CAN_ADD_MEDIA` / `UPLOAD_MEDIA_ALLOWED` settings (skill `portal-configuration`)
+- Chunked uploads (Fine Uploader) happen through `/fu/` endpoints — the browser flow, not the REST API
 
-`POST /api/v1/media` with multipart `media_file`, plus optional `title`, `description`.
+## Schema and tooling
 
-Optional metadata (also on `PUT /api/v1/media/{friendly_token}`):
+- Swagger UI: `/swagger` — schema: `/swagger.json` (drf-yasg)
+- Browsable API login: `/api-auth/`
+- Bundled client: `cli-tool/cli.py` (`login`, `whoami`; own venv + `pip install -r cli-tool/requirements.txt`, `.env` in `cli-tool/`)
 
-- `state`, `category_uids` / `category_titles`, `tag_titles`
-- `enable_comments`, `allow_download`
-- Editor-only: `owner`
-
-FineUploader-style success payloads may include `friendly_token` and `thumbnailUrl`.
+## Smoke-testing a live instance
 
 ```bash
-curl -s -u admin:admin \
-  -F "media_file=@/path/to/sample.mp4" \
-  -F "title=API smoke" \
-  -F "description=dev-api skill check" \
-  http://localhost/api/v1/media
+python scripts/api_smoke.py --base-url http://localhost --user admin --password admin
+python scripts/api_smoke.py --base-url http://localhost --user admin --password admin \
+       --upload-file sample.mp4   # adds upload → detail → delete round-trip
 ```
 
-After video upload, encoding runs async (skill `media-pipeline`). Poll media detail or admin processing views; don’t assume instant HLS.
-
-## Validation checklist
-
-- [ ] 401/403 behave as expected for anonymous vs authed
-- [ ] Upload rejected types respect `ALLOWED_MEDIA_UPLOAD_TYPES`
-- [ ] Private/unlisted/`PORTAL_WORKFLOW` visibility matches settings
-- [ ] Owner override only works for privileged users
-- [ ] CSRF not required for basic-auth API; browser session POSTs from other origins need `CSRF_TRUSTED_ORIGINS` (local_settings — don’t commit)
+Stdlib-only (no `requests`); exits non-zero on any failed check. Auth-less runs test only the anonymous endpoints. See [tests/test_api_smoke.py](tests/test_api_smoke.py) for offline coverage of request building and response classification.
 
 ## Additional resources
 
-- `docs/en/reference/api.md`, `docs/en/guides/developer/architecture.md` (upload metadata)
-- Swagger UI on the running instance
-- Tests: `tests/api/` (patterns to mirror, not replace)
-- Skills: `dev-stack`, `rbac-permissions`, `media-pipeline`, `test-ci`
+- `files/urls.py`, `users/urls.py`, `migrationservice/urls.py` (upstream route sources)
+- Skills: `rbac-permissions` (401/403 causes), `media-pipeline` (encoding statuses), `migrations`

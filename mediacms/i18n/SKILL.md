@@ -1,53 +1,57 @@
 ---
 name: i18n
-description: Add or fix MediaCMS translations for the React frontend and Django admin portal, including RTL layout checks. Use when adding UI strings, running process_translations, translating admin/dashboard text, or fixing Greek/German/Spanish/Portuguese/RTL issues.
-license: AGPL-3.0
+description: Add, improve, and manage MediaCMS translations across the React frontend and Django templates — the en.py master file, the process_translations management command, adding new languages, and the rebuild rules that decide when changes become visible. Use when translating strings, adding languages, fixing missing-translation keys, or preparing a translation change for an upstream PR.
+license: MIT
 metadata:
-  author: mrjoshuap
+  author: greedychipmunk
   version: "1.0"
-  source: https://github.com/mrjoshuap-hq/mediacms/tree/mediacms-next/skills/i18n
 ---
 
-# i18n and translations
+# MediaCMS Translations
 
-> **Scope:** targets the [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms) fork (`mediacms-next` branch). Repo paths such as `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in that repository checkout; sibling skills are referenced by name from this `mediacms` collection.
+> **Scope:** targets [mediacms-io/mediacms](https://github.com/mediacms-io/mediacms) v9.6.1 (commit `99a1801`, branch `main`). Translation files: `files/frontend_translations/`; command: `files/management/commands/process_translations.py`.
 
-## Two systems
+## The two translation surfaces
 
-| Surface | Mechanism | Source of truth |
-| ------------------------ | ----------------------------------------- | -------------------------------- |
-| React / portal frontend | `translateString` + language `.py` files | `files/frontend_translations/en.py` first |
-| Django admin / templates | `{% trans %}` / `gettext` | Django message catalogs / template tags |
+1. **React frontend** — strings wrapped with `translateString` in `frontend/src`; served from Python dicts in `files/frontend_translations/<lang>.py`
+2. **Django templates** — `{% trans %}`/gettext blocks in `templates/` (see `templates/cms/about.html` for the pattern)
 
-Do not put admin-only strings only in `frontend_translations`, or React strings only in gettext.
+Each language file defines two dicts: `translation_strings` (English key → translation, `""` = untranslated) and `replacement_strings`. `en.py` is the **master key set** (~315 keys, sorted).
 
-## Frontend workflow (mandatory)
+## The workflow (mandatory for upstream PRs)
 
-1. Mark the string in React (see existing `translateString` usage under `frontend/`).
-2. Add the English string to `files/frontend_translations/en.py` **first**.
-3. Run `make languages` (or `python manage.py process_translations`) to propagate.
-4. Translate other languages in `files/frontend_translations/<lang>.py` as needed.
-5. Rebuild frontend for port 80: `make frontend-build`.
+1. Mark the string translatable in code (React `translateString` or template `{% trans %}`)
+2. Add the English string to `files/frontend_translations/en.py` first
+3. Run:
 
-## Admin workflow
+```bash
+python manage.py process_translations
+```
 
-1. Wrap user-visible strings with `{% trans %}` or `gettext` / `gettext_lazy`.
-2. Audit sidebar, changelist headers, change-form tabs, action dropdowns, and metric labels.
-3. Incomplete dropdowns often show raw `"object name: …"` — fix the message, don’t hide it in CSS.
+This propagates the new key into **every** language file (as untranslated). Upstream will not accept a PR that skips this — it guarantees no language is missing a key.
 
-## RTL smoke
+4. Translate the string in the language(s) you care about
+5. Rebuild rules: template-only changes need no rebuild; React string changes need `make build-frontend` to appear on port 80
 
-After LTR looks correct, check an RTL language:
+## Language management
 
-- [ ] Sidebar and main content do not overlap
-- [ ] Refresh / filter controls stay usable
-- [ ] Icons and chevrons flip or stay readable
+- **Default language**: `LANGUAGE_CODE` in `settings.py`
+- **Limit the selector**: remove entries from the `LANGUAGES` list in `settings.py` — only listed languages appear
+- **Add a language**: add it to `LANGUAGES`, then copy `en.py` to `files/frontend_translations/<code>.py` and translate
+- ~23 frontend translation files ship: ar, bn, da, de, el, es, fr, he, hi, id, it, ja, ko, nl, pt, ru, sl, tr, ur, zh_hans, zh_hant…
+- Runtime switching: `/setlanguage` (frontend) and Django's `/i18n/` URLs
 
-See [references/dual-i18n.md](references/dual-i18n.md).
+## Check translation files offline
+
+```bash
+python scripts/check_translations.py files/frontend_translations/en.py files/frontend_translations/de.py
+python scripts/check_translations.py --dir /path/to/mediacms/files/frontend_translations   # all languages vs en.py
+```
+
+Reports keys missing from a language (run `process_translations` to fix), stale keys not in en.py, and how many strings remain untranslated. Stdlib-only. Tests: [tests/test_check_translations.py](tests/test_check_translations.py).
 
 ## Additional resources
 
-- [references/dual-i18n.md](references/dual-i18n.md)
-- `docs/en/guides/developer/translations.md`
-- `docs/en/languages.md`
-- `files/frontend_translations/en.py`
+- [references/translation-workflow.md](references/translation-workflow.md)
+- `docs/admins_docs.md` §10, §20
+- Skills: `dev-stack` (frontend rebuild), `portal-configuration` (LANGUAGE settings)
