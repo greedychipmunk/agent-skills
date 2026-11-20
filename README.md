@@ -55,8 +55,9 @@ A curated collection of specialized skills for AI coding agents. Each skill pack
 The 14 `MediaCMS …` skills above live under [`mediacms/`](./mediacms) and
 were created by **Josh Preston (@mrjoshuap)** for his MediaCMS fork. They are
 vendored from [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms)
-(branch `mediacms-next`, commit `a8c0ce1`) under **AGPL-3.0**, unmodified
-except for added frontmatter license/author metadata — see
+(branch `mediacms-next`, commit `a8c0ce1`) under **AGPL-3.0**. Each skill
+carries a scope note naming its target repository, and cross-references use
+skill names so they resolve when installed from this catalog — see
 [`mediacms/ATTRIBUTION.md`](./mediacms/ATTRIBUTION.md) for details.
 
 ## Skill Structure

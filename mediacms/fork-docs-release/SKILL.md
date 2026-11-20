@@ -10,6 +10,8 @@ metadata:
 
 # Fork docs and release
 
+> **Scope:** targets the [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms) fork (`mediacms-next` branch). Repo paths such as `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in that repository checkout; sibling skills are referenced by name from this `mediacms` collection.
+
 ## Instructions
 
 1. **Fork what’s new:** edit only `docs/_shared/fork-whats-new.md` (Conventional Commits sections). `scripts/prepare_docs_build.py` injects it into `docs/en/reference/whats-new.md` for channels `beta` / `local` / `dev` / `stable` / `latest`.
@@ -19,7 +21,7 @@ metadata:
 5. **Branches:** `MEDIACMS_STABLE_BRANCH` (default `main`) and `MEDIACMS_BETA_BRANCH` (default `mediacms-next`). Workflows list both under `on.push` because triggers cannot read vars.
 6. **Mike aliases:** stable → `dev`, beta → `beta`, tags → `latest`. Pages source must be **GitHub Actions** (`docs.yml` → mike → `actions/deploy-pages`).
 7. **GHCR:** `release.yml` publishes date-stamped tags from `version/FORK_VERSION`. Pushes to `mediacms-next` → pre-release + `:beta` / full `:beta`. Matching stamp tags from `main` → `:stable`. Prefer this over enabling semantic-release unless asked.
-8. **Disclosure:** a release issue, release-note comment, or hand-written GitHub Release body that an agent writes ends with the AI disclosure footer in `skills/maintainer/SKILL.md`. The published What's new page ends with that footer too. `scripts/prepare_docs_build.py` appends it when it generates `docs/en/reference/whats-new.md` for a fork channel, so regeneration keeps the line. Leave the footer out of the source notes body, `CHANGELOG.md`, and the `INSTALL-*.md` asset `release.yml` publishes. Do not hand-edit the generated what's-new page.
+8. **Disclosure:** a release issue, release-note comment, or hand-written GitHub Release body that an agent writes ends with the AI disclosure footer defined in the `maintainer` skill. The published What's new page ends with that footer too. `scripts/prepare_docs_build.py` appends it when it generates `docs/en/reference/whats-new.md` for a fork channel, so regeneration keeps the line. Leave the footer out of the source notes body, `CHANGELOG.md`, and the `INSTALL-*.md` asset `release.yml` publishes. Do not hand-edit the generated what's-new page.
 
 ## Additional resources
 

@@ -10,6 +10,8 @@ metadata:
 
 # Maintainer
 
+> **Scope:** targets the [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms) fork (`mediacms-next` branch). Repo paths such as `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in that repository checkout; sibling skills are referenced by name from this `mediacms` collection.
+
 Fork-only supplement for Joshua's rules on `mrjoshuap-hq/mediacms`. It may add or narrow rules. It must not contradict upstream rules for anything sent upstream, `AGENTS.md`, or a domain skill. On a conflict, stop, leave the authoritative file unchanged, and open an issue. The full precedence list is in `AGENTS.md` under "Supplements and precedence".
 
 `skills/github-orchestration` (issue #8) does not exist yet. When it lands, it must reference the AI disclosure rule below. Do not create that skill from this one.

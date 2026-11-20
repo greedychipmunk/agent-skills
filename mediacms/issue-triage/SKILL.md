@@ -10,6 +10,8 @@ metadata:
 
 # Issue triage
 
+> **Scope:** targets the [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms) fork (`mediacms-next` branch). Repo paths such as `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in that repository checkout; sibling skills are referenced by name from this `mediacms` collection.
+
 ## Instructions
 
 1. Confirm the issue still applies on the **current** target branch (`mediacms-next` or `main`) by reading code and reproducing or tracing the path — do not trust old comments alone.
@@ -18,7 +20,7 @@ metadata:
 4. If behavior is intentionally absent, consider `@unimplemented` only for stubbed tests — see skill `test-ci`.
 5. Do not commit or open PRs unless the user asks.
 6. When fixing, add or update tests under the matching `tests/` area when practical.
-7. When you post an issue, issue comment, or triage plan on GitHub, follow the AI disclosure rule in `skills/maintainer/SKILL.md`. Leave issue-template disclosure checkboxes unticked.
+7. When you post an issue, issue comment, or triage plan on GitHub, follow the AI disclosure rule in the `maintainer` skill. Leave issue-template disclosure checkboxes unticked.
 
 ## Additional resources
 

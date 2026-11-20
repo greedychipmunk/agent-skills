@@ -10,6 +10,8 @@ metadata:
 
 # RBAC and permissions
 
+> **Scope:** targets the [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms) fork (`mediacms-next` branch). Repo paths such as `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in that repository checkout; sibling skills are referenced by name from this `mediacms` collection.
+
 ## Instructions
 
 1. Prefer config and gate fixes over schema changes.

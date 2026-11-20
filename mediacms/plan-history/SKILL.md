@@ -10,6 +10,8 @@ metadata:
 
 # Plan history archival
 
+> **Scope:** targets the [mrjoshuap-hq/mediacms](https://github.com/mrjoshuap-hq/mediacms) fork (`mediacms-next` branch). Repo paths such as `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in that repository checkout; sibling skills are referenced by name from this `mediacms` collection.
+
 ## When (required)
 
 Archive after any of these for **this** MediaCMS repo:
@@ -39,9 +41,11 @@ Preserve the original filename (e.g. `rbac_permissions_audit_ef026657.plan.md`).
 3. Refresh the catalog:
 
 ```bash
-python3 skills/plan-history/scripts/refresh_index.py
-python3 skills/plan-history/scripts/refresh_index.py --archive PATH
+# from this skill's directory (the archive path points at the target repo):
+python3 scripts/refresh_index.py --archive /path/to/mediacms-repo/.agent/plan-history
 ```
+
+Without `--archive`, the script indexes `./.agent/plan-history` relative to the working directory.
 
 The script indexes every `*.md` file in the archive except `INDEX.md` and `README.md` (`README.md` is the folder guide). `--archive` reads and writes a different directory. `date` comes from frontmatter (`date` or `created`), then a `- Date: YYYY-MM-DD` line, then the date already stored in `manifest.json`. Only a note with none of those uses the first git commit that added the file. `updated` uses the first match: the recorded value when `content_sha256` equals the SHA-256 of the file's LF-normalised bytes; the recorded value for a legacy entry that has no hash while the file is clean (that run also stores the hash); the author date of the last commit when the file is tracked and clean; otherwise the current time, written once. The same bytes keep that `updated` on later runs, including after commit and in a fresh clone. `content_sha256` is stored only in `manifest.json`. On a clean checkout a second run leaves `INDEX.md` and `manifest.json` unchanged. A shallow clone prints a one-line warning.
 

@@ -15,21 +15,39 @@ his MediaCMS fork and are vendored here with credit.
 
 ## Changes made here
 
-Skill bodies are vendored unmodified — byte-identical to the pinned commit.
-The only edit is a five-line frontmatter addition in each `SKILL.md`
-(`license: AGPL-3.0` plus `metadata` carrying the author, a catalog version,
-and the upstream source URL) so the credit travels with every copy of the
-skill. No other files were changed.
+The skills are vendored from the pinned commit with two recorded passes of
+edits; everything else is byte-identical to upstream:
+
+1. **Frontmatter credit** (all 14 `SKILL.md`): `license: AGPL-3.0` plus
+   `metadata` carrying the author, a catalog version, and the upstream source
+   URL, so the credit travels with every copy of a skill.
+2. **Standardization for catalog use** (all 14 `SKILL.md`): a one-paragraph
+   scope note after the title stating the target repository (paths such as
+   `admin_customizations/`, `docs/en/…`, and `AGENTS.md` resolve in the
+   MediaCMS checkout, not in this catalog). Fork-layout self-references were
+   rewritten to resolve from the installed skill:
+   `skills/maintainer/SKILL.md` → the `maintainer` skill (in `issue-triage`,
+   `merge-hygiene`, `fork-docs-release`), and the `plan-history` script
+   invocation is now skill-relative
+   (`python3 scripts/refresh_index.py --archive <repo>/.agent/plan-history`).
+
+References to MediaCMS code (`admin_customizations/`, `files/`, `rbac/`,
+`docs/en/…`, Makefile targets, compose files) are the skills' subject matter
+and are unchanged. `refresh_index.py` is unmodified; its generated `INDEX.md`
+boilerplate still mentions the fork-relative `skills/plan-history/SKILL.md`
+path, which is cosmetic.
 
 ## Context
 
-These skills target the fork's repository layout. They reference paths such as
-`skills/<name>`, `AGENTS.md`, `docs/en/…`, `admin_customizations/`,
-`files/frontend_translations/`, and fork-specific workflows (mike docs
-channels, GHCR releases, the fork's label/project scheme, AI disclosure
-rules). They are most useful when working on that fork or a similar MediaCMS
-deployment. Two skills they reference — `frontend` and `github-orchestration` —
-are planned on the fork but not in this snapshot.
+These skills guide development on the MediaCMS codebase — the
+mrjoshuap-hq fork, which extends upstream
+[mediacms-io/mediacms](https://github.com/mediacms-io/mediacms). Most code
+anchors (`admin_customizations/`, `rbac/`, `identity_providers/`, `saml_auth/`,
+`files/`, `frontend/`) exist upstream; the `docs/en/` tree, mike docs
+channels, GHCR release flow, and the fork's label/project scheme and AI
+disclosure rules are fork-specific. Load the relevant skill when working in a
+checkout of that repository. Two skills they mention — `frontend` and
+`github-orchestration` — are planned on the fork but not in this snapshot.
 
 ## Skill inventory
 
